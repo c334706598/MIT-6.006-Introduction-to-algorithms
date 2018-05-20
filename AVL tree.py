@@ -32,13 +32,42 @@ class BinarySearchTree:
                 self._put(key, val, current_node.left_child)
             else:
                 current_node.left_child = TreeNode(key, val, parent = current_node)
+                self.update_height(current_node.left_child)  # update the heights along the insertion path
+                self.AVLify(current_node.left_child)
         elif key > current_node.key:
             if current_node.has_right_child():
                 self._put(key, val, current_node.right_child)
             else:
                 current_node.right_child = TreeNode(key, val, parent = current_node)
+                self.update_height(current_node.right_child) # update the heights along the insertion path
+                self.AVLify(current_node.right_child)
         else:
             current_node.payload = val
+            
+    def AVLify(self, current_node):
+        while current_node:
+            if self.imbalance(current_node) < -1:
+                if self.imbalance(current_node.right_child) == 1:
+                    self.right_rotate(current_node.right_child)
+                    self.left_rotate(current_node)
+                else:
+                    self.left_rotate(current_node)
+                current_node = current_node.parent.parent
+                    
+            elif self.imbalance(current_node) > 1:
+                if self.imbalance(current_node.left_child) == -1:
+                    self.left_rotate(current_node.left_child)
+                    self.right_rotate(current_node)
+                else:
+                    self.right_rotate(current_node)
+                current_node = current_node.parent.parent
+            else:
+                current_node = current_node.parent
+    
+    def imbalance(self, current_node):
+        height_left = self.get_height(current_node.left_child)
+        height_right = self.get_height(current_node.right_child)
+        return height_left - height_right            
             
     def __setitem__(self, k ,v):
         self.put(k, v)
@@ -213,7 +242,14 @@ class BinarySearchTree:
             return current_node.parent
         else:                                      # current_node is the roor and has no left child
             return None
-    
+        
+    def update_height(self, current_node):
+        while current_node != None:
+            current_node.height = max(self.get_height(current_node.left_child),self.get_height(current_node.right_child)) + 1
+            current_node = current_node.parent
+        
+    def get_height(self, current_node):
+        return -1 if current_node == None else current_node.height
     def inorder(self):
         current_node = self.root
         self._inorder(current_node)
@@ -229,7 +265,7 @@ class BinarySearchTree:
     def _inorder(self, current_node):
         if current_node.has_left_child():
             self._inorder(current_node.left_child)
-        print("{",current_node.key,":",current_node.payload,"}\n")
+        print("{",current_node.key,":",current_node.payload, ", height=", current_node.height,"imbalance=", self.imbalance(current_node), "},\n")
         if current_node.has_right_child():
             self._inorder(current_node.right_child)
 
@@ -245,15 +281,59 @@ class BinarySearchTree:
             self._postorder(current_node.left_child)
         if current_node.has_right_child():
             self._postorder(current_node.right_child)
-        print("{",current_node.key,":",current_node.payload,"}\n")        
+        print("{",current_node.key,":",current_node.payload,"}\n")
+
+    def left_rotate(self, current_node):
+        if current_node.has_right_child():         # check if current node has right child to proceed
+            temp_node = current_node.right_child
+            
+            temp_node.parent = current_node.parent  # link temp node to the current node's parent
+            if current_node.is_left_child():
+                temp_node.parent.left_child = temp_node
+            elif current_node.is_right_child():
+                temp_node.parent.right_child = temp_node
+            else:
+                self.root = temp_node
+        
+            current_node.right_child = temp_node.left_child # the left child of temp node become right child of current node
+            if temp_node.has_left_child():
+                temp_node.left_child.parent = current_node
+            
+            temp_node.left_child = current_node # current node become the left child of temp node
+            current_node.parent = temp_node
+            
+            self.update_height(current_node)
+            
+    def right_rotate(self, current_node):
+        if current_node.has_left_child():        # check if current node has left child to proceed
+            temp_node = current_node.left_child
+            
+            temp_node.parent = current_node.parent  # link temp node to the current node's parent
+            if current_node.is_left_child():
+                temp_node.parent.left_child = temp_node
+            elif current_node.is_right_child():
+                temp_node.parent.right_child = temp_node
+            else:
+                self.root = temp_node
+            
+            current_node.left_child = temp_node.right_child # the right child of temp node become left child of current node
+            if temp_node.has_right_child():
+                temp_node.right_child.parent = current_node
+            
+            temp_node.right_child = current_node # current node become the right child of temp node
+            current_node.parent = temp_node
+            
+            self.update_height(current_node)
+
         
 class TreeNode:
-    def __init__(self, key, val, left = None, right = None, parent = None):
+    def __init__(self, key, val, left = None, right = None, parent = None, height = 0):
         self.key = key
         self.payload = val
         self.left_child = left
         self.right_child = right
         self.parent = parent
+        self.height = height
         
     def has_left_child(self):
         return self.left_child
@@ -288,16 +368,16 @@ class TreeNode:
             self.left_child.parent = self
         if self.has_right_child():
             self.right_child.parent = self
-        
+#        
 #import random
 #        
 #a = BinarySearchTree()
-#b = [int(random.uniform(0,100)) for _ in range(20)]
+#b = [int(random.uniform(0,10000)) for x in range(100)]
 #print(b)
 #
 #for x in b:
 #    a.put(x, x)
-
+#
 #a.inorder()
 #a.postorder()         
 #a.preorder()
