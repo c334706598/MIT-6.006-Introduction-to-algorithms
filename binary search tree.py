@@ -87,31 +87,56 @@ class BinarySearchTree:
             raise KeyError('Error, key not in tree')
             
     def remove(self, current_node):
-        if current_node.has_both_children():
-            temp_node = self._successor(current_node)
-            temp_node.parent = current_node.parent
-            if current_node.parent == None:
-                pass
-            elif current_node.is_left_child():
+        if current_node.has_both_children(): # if current_node has both children, find the successor and replace the current_node
+            temp_node = self._successor(current_node) # find the successor
+            
+            self.remove(temp_node)         # remove the successor from the tree
+                        
+            temp_node.parent = current_node.parent   # bidirectional link the successor to the new parent
+            
+            if current_node.is_left_child():
                 temp_node.parent.left_child = temp_node
-            else:
+            if current_node.is_right_child():
                 temp_node.parent.right_child = temp_node
-            temp_node.left_child = current_node.left_child
-            ...........
-        elif current_node.has_left_child():
-            pass
-        elif current_node.has_right_child():
-            pass
-        else:
-            pass
+                
+            if current_node.has_left_child():    # bidirectional link the successor to new children
+                temp_node.left_child = current_node.left_child
+                temp_node.left_child.parent = temp_node
+                
+            if current_node.has_right_child():
+                temp_node.right_child = current_node.right_child
+                temp_node.right_child.parent = temp_node
+
+        elif current_node.has_left_child():    # if current_node only has left chidren, replace the current_node with its left children
+            temp_node = current_node.left_child
+            
+            temp_node.parent = current_node.parent # bidirectional link the temp_node to the new parent
+            if current_node.is_left_child():
+                temp_node.parent.left_child = temp_node
+            if current_node.is_right_child():
+                temp_node.parent.right_child = temp_node
+                
+        elif current_node.has_right_child():    # if current_node only has right children, replace the current
+            temp_node = current_node.right_child
+            
+            temp_node.parent = current_node.parent # bidirectional link the temp_node to the new parent
+            if current_node.is_left_child():
+                temp_node.parent.left_child = temp_node
+            if current_node.is_right_child():
+                temp_node.parent.right_child = temp_node
         
-    
+        else:                                   # the current_node is a leaf
+            if current_node.is_left_child():
+                temp_node.parent.left_child = None
+            if current_node.is_right_child():
+                temp_node.parent.right_child = None
+                        
     def __delitem__(self, key):
         self.delete(key)
         
     def findmin(self):
         if self.size > 0:
-            return self._findmin(self.root).payload
+            return self._findmin(self.root)
         else:
             return None
     
@@ -122,13 +147,13 @@ class BinarySearchTree:
     
     def findmax(self):
         if self.size > 0:
-            return self._findmax(self.root).payload
+            return self._findmax(self.root)
         else:
             return None
         
     def _findmax(self, current_node):
-        while current_node.has_left_child():
-            current_node = current_node.left_child
+        while current_node.has_right_child():
+            current_node = current_node.right_child
         return current_node
     
     def successor(self, key):
@@ -142,8 +167,20 @@ class BinarySearchTree:
             return None
     
     def _successor(self, current_node):
-        pass
-    
+        if current_node.has_right_child():        # If current_node has right child, find the smallest in the right child
+            current_node = current_node.right_child
+            while current_node.has_left_child():
+                current_node = current_node.left_child
+            return current_node
+        elif current_node.is_left_child():       # else if the node is left child, its parent is the successor
+            return current_node.parent
+        elif current_node.is_right_child():      # else if the current node is a right child, go all the way to the left_up direction, then find the parent
+            while current_node.is_right_child():
+                current_node = current_node.parent
+            return current_node.parent
+        else:                                    # current_node is the root and has no right child
+            return None
+            
     def predecessor(self, key):
         if self.root:
             res = self._get(key, self.root)
@@ -154,9 +191,53 @@ class BinarySearchTree:
         else:
             return None
 
-    def _predecessor(self, current_node):        
+    def _predecessor(self, current_node):              
+        if current_node.has_left_child():           # If current_node has left child, the predecessor is the largest node in the left child
+            current_node = current_node.left_child
+            while current_node.has_right_child():
+                current_node = current_node.right_child
+            return current_node
+        elif current_node.is_right_child():        # else if the current_node is a right child, its parent the predecessor
+            return current_node.parent
+        elif current_node.is_left_child():         # else if the current_node is a left child, go all the way to the right_up direction, then find the parent of taht node
+            while current_node.is_left_child():
+                current_node = current_node.parent
+            return current_node.parent
+        else:                                      # current_node is the roor and has no left child
+            return None
     
-    
+    def inorder(self):
+        current_node = self.root
+        self._inorder(current_node)
+
+    def preorder(self):
+        current_node = self.root
+        self._preorder(current_node)
+
+    def postorder(self):
+        current_node = self.root
+        self._postorder(current_node)
+        
+    def _inorder(self, current_node):
+        if current_node.has_left_child():
+            self._inorder(current_node.left_child)
+        print("{",current_node.key,":",current_node.payload,"}\n")
+        if current_node.has_right_child():
+            self._inorder(current_node.right_child)
+
+    def _preorder(self, current_node):
+        print("{",current_node.key,":",current_node.payload,"}\n")
+        if current_node.has_left_child():
+            self._preorder(current_node.left_child)
+        if current_node.has_right_child():
+            self._preorder(current_node.right_child)
+        
+    def _postorder(self, current_node):
+        if current_node.has_left_child():
+            self._postorder(current_node.left_child)
+        if current_node.has_right_child():
+            self._postorder(current_node.right_child)
+        print("{",current_node.key,":",current_node.payload,"}\n")        
         
 class TreeNode:
     def __init__(self, key, val, left = None, right = None, parent = None):
@@ -176,7 +257,7 @@ class TreeNode:
         return self.parent and self.parent.left_child == self
     
     def is_right_child(self):
-        return self.parent and self.parent_right_child == self
+        return self.parent and self.parent.right_child == self
     
     def is_root(self):
         return not self.parent
@@ -200,11 +281,28 @@ class TreeNode:
         if self.has_right_child():
             self.right_child.parent = self
         
-        
-a = BinarySearchTree()
-a.put(1,10)
-a.put(2,100)
-a.put(3,1000)
-a.delete(2)
-print(a.length())         
+#import random
+#        
+#a = BinarySearchTree()
+#b = [int(random.uniform(0,100)) for _ in range(20)]
+#print(b)
+#
+#for x in b:
+#    a.put(x, x)
+
+#a.inorder()
+#a.postorder()         
+#a.preorder()
+#print(a.findmax().payload)
+#print(a.findmin().payload)
+#MIN = a.findmin()
+#current_node = MIN
+#while a.successor(current_node.key):
+#    print(current_node.payload)
+#    current_node = a.successor(current_node.key) 
+#MAX = a.findmax()
+#current_node = MAX
+#while a.predecessor(current_node.key):
+#    print(current_node.payload)
+#    current_node = a.predecessor(current_node.key) 
     
