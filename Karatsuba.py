@@ -14,19 +14,19 @@ def mul(a, b):
     la = len(a)         ### O(1)
     lb = len(b)         ### O(1)
     n = 1
-    while 2**n < len(a) or 2**n < len(b):      ###
+    while 2**n < len(a) or 2**n < len(b):      ### O(lgn)
         n += 1           
     
     a = '0'*(2**n-la) + a        ### O(n)
     b = '0'*(2**n-lb) + b        ### O(n)
 
     if len(a) <= 2 and len(b) <= 2:
-        return str(int(a)*int(b))
+        return str(int(a)*int(b))   ### O(1)
     else:
-        a0 = low(a)
-        a1 = high(a)
-        b0 = low(b)
-        b1 = high(b)
+        a0 = low(a)         # Time complexity O(n)
+        a1 = high(a)        # Time complexity O(n)
+        b0 = low(b)         # Time complexity O(n)
+        b1 = high(b)        # Time complexity O(n)
         c0 = mul(a0, b0)
         c2 = mul(a1, b1)
 #        print(mul(add(a0, a1), add(b0, b1)))
@@ -38,15 +38,15 @@ def mul(a, b):
         return add(add(c2, c1), c0)
         
 
-def high(a):
+def high(a):   ### Time complexity O(n)
     l = len(a)
     return a[:l//2]
 
-def low(a):
+def low(a):    ### Time complexity O(n)
     l = len(a)
     return a[l//2:]
 
-def trim(string):
+def trim(string):    ### Time complexity O(n)
     p = 0
     l = len(string)
     while p < l:
@@ -60,7 +60,7 @@ def trim(string):
         return string[p:]
         
 
-def add(a, b):
+def add(a, b):     ### Time complexity O(n)
 ###    return str(int(a)+int(b))  ### This is not linear time !!!    
 ### the following is linear complexity
     
@@ -100,7 +100,7 @@ def add(a, b):
                 
 #print(add('1233123'))
 
-def minus(a, b):
+def minus(a, b):     ### Time complexity O(n)
     ### assuming here a is always larger than b, all the operation is defined on the positive integers
     ### linear time complexity
     a = trim(a)
@@ -187,16 +187,17 @@ t = []
 #    x.append(i+1)
 #    t.append(t2-t1)
 
-for i in range(10):
+for i in range(1,100,10):
     
-    int1 = '1'*10*2**i
-    int2 = '2'*10*2**i
-    
+#    int1 = '1'*10*2**i
+#    int2 = '2'*10*2**i
+    a = '0'*i*100000 +'1'
     t1 = time.time()    
-    mul(int2, int1)
+#    mul(int2, int1)
+    trim(a)
     t2 = time.time()
-    print(i)
-    print(t2-t1)
+#    print(i)
+#    print(t2-t1)
     x.append(i)
     t.append(t2-t1)
 
